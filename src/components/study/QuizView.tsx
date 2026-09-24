@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { ArrowLeft, RotateCcw } from 'lucide-react';
 import { QuizQuestionItem } from '../../types/study';
 import { useQuiz } from '../../hooks/useQuiz';
@@ -39,10 +39,12 @@ export const QuizView: React.FC<QuizViewProps> = ({
     retryWrongAnswers,
   } = useQuiz(questions);
 
-  // If completed, transition to results
-  if (isCompleted && subView === 'taking') {
-    setSubView('results');
-  }
+  // Pure React state synchronization using useEffect (Issue #2 fix)
+  useEffect(() => {
+    if (isCompleted && subView === 'taking') {
+      setSubView('results');
+    }
+  }, [isCompleted, subView]);
 
   const handleRetryWrong = () => {
     retryWrongAnswers();
@@ -105,13 +107,13 @@ export const QuizView: React.FC<QuizViewProps> = ({
             Question {currentQuestionIndex + 1} of {totalQuestions}
           </span>
         </div>
-        <div style={{ height: '6px', backgroundColor: 'var(--border-color)', borderRadius: '9999px', overflow: 'hidden' }}>
+        <div style={{ height: '5px', backgroundColor: 'var(--border-color)', borderRadius: '9999px', overflow: 'hidden' }}>
           <div
             style={{
               height: '100%',
               width: `${progressPercent}%`,
               backgroundColor: 'var(--secondary)',
-              transition: 'width 0.3s ease',
+              transition: 'width 0.25s ease',
               borderRadius: '9999px',
             }}
           />

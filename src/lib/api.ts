@@ -14,13 +14,24 @@ export class ApiError extends Error {
 }
 
 /**
- * Calls backend /api/generate and validates structured JSON output
+ * Calls backend /api/generate with 35-second timeout and validates structured JSON output
  */
 export async function generateStudySetApi(
   params: GenerateRequest,
   signal?: AbortSignal
 ): Promise<StudySetData> {
   let response: Response;
+  const timeoutMs = 35000;
+
+  // Create an internal timeout controller linked to the outer signal
+  const timeoutController = new AbortController();
+  const timeoutId = setTimeout(() => {
+    timeoutController.abort(new Error('TIMEOUT'));
+  }, timeoutMs);
+
+  const combinedSignal = signal
+    ? anySignal([signal, timeoutController.signal])
+    : timeoutController.signal;
 
   try {
     response = await fetch('/api/generate', {
@@ -29,16 +40,25 @@ export async function generateStudySetApi(
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(params),
-      signal,
+      signal: combinedSignal,
     });
   } catch (err: any) {
-    if (err.name === 'AbortError') {
+    clearTimeout(timeoutId);
+    if (err?.message === 'TIMEOUT' || timeoutController.signal.aborted) {
+      throw new ApiError(
+        'Generation timed out. The AI model is taking longer than expected. Please try again.',
+        'TIMEOUT'
+      );
+    }
+    if (err?.name === 'AbortError') {
       throw new ApiError('Request was cancelled.', 'ABORTED');
     }
     throw new ApiError(
       'Unable to connect to the backend server. Please verify the server is running.',
       'NETWORK_ERROR'
     );
+  } finally {
+    clearTimeout(timeoutId);
   }
 
   let json: any;
@@ -70,6 +90,21 @@ export async function generateStudySetApi(
   }
 
   return validation.data;
+}
+
+/**
+ * Combines multiple abort signals
+ */
+function anySignal(signals: AbortSignal[]): AbortSignal {
+  const controller = new AbortController();
+  for (const sig of signals) {
+    if (sig.aborted) {
+      controller.abort();
+      return controller.signal;
+    }
+    sig.addEventListener('abort', () => controller.abort(), { once: true });
+  }
+  return controller.signal;
 }
 
 /**

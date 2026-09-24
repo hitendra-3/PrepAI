@@ -5,9 +5,7 @@ import {
   ArrowRight, 
   Bookmark, 
   BookmarkCheck, 
-  Share2, 
-  RotateCcw,
-  Sparkles 
+  RotateCcw
 } from 'lucide-react';
 import { StudySetRecord } from '../../types/study';
 import { SummaryCard } from './SummaryCard';
@@ -30,11 +28,6 @@ export const StudyOverview: React.FC<StudyOverviewProps> = ({
   const hasFlashcards = record.data.flashcards.length > 0;
   const hasQuiz = record.data.quiz.length > 0;
 
-  const handleShare = () => {
-    navigator.clipboard.writeText(window.location.href);
-    alert('Study set link copied to clipboard!');
-  };
-
   return (
     <div className="animate-fade-in" style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
       {/* Top Action Bar */}
@@ -50,13 +43,8 @@ export const StudyOverview: React.FC<StudyOverviewProps> = ({
             className={`btn btn-sm ${record.isFavorite ? 'btn-primary' : 'btn-secondary'}`}
             title="Save to favorites"
           >
-            {record.isFavorite ? <BookmarkCheck size={16} /> : <Bookmark size={16} />}
+            {record.isFavorite ? <BookmarkCheck size={15} /> : <Bookmark size={15} />}
             <span>{record.isFavorite ? 'Favorited' : 'Favorite'}</span>
-          </button>
-
-          <button onClick={handleShare} className="btn btn-secondary btn-sm" title="Share study set">
-            <Share2 size={16} />
-            <span>Share</span>
           </button>
         </div>
       </div>
@@ -77,7 +65,7 @@ export const StudyOverview: React.FC<StudyOverviewProps> = ({
           <div
             className="prepai-card"
             style={{
-              padding: '24px',
+              padding: '28px',
               display: 'flex',
               flexDirection: 'column',
               justifyContent: 'space-between',
@@ -89,9 +77,9 @@ export const StudyOverview: React.FC<StudyOverviewProps> = ({
             <div>
               <div
                 style={{
-                  width: '44px',
-                  height: '44px',
-                  borderRadius: '12px',
+                  width: '42px',
+                  height: '42px',
+                  borderRadius: '10px',
                   backgroundColor: 'var(--primary-light)',
                   color: 'var(--primary)',
                   display: 'flex',
@@ -100,13 +88,13 @@ export const StudyOverview: React.FC<StudyOverviewProps> = ({
                   marginBottom: '14px',
                 }}
               >
-                <Layers size={22} />
+                <Layers size={20} />
               </div>
               <h3 style={{ fontSize: '1.15rem', fontWeight: 700, marginBottom: '6px' }}>
                 Interactive Flashcards
               </h3>
-              <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', lineHeight: 1.5 }}>
-                Master key terms, definitions, and concepts through active flip-card recall with keyboard controls.
+              <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)', lineHeight: 1.5 }}>
+                Master key terms, definitions, and concepts through active 3D flip cards with keyboard shortcuts.
               </p>
             </div>
 
@@ -116,7 +104,7 @@ export const StudyOverview: React.FC<StudyOverviewProps> = ({
               style={{ width: '100%', justifyContent: 'space-between' }}
             >
               <span>Start Flashcards ({record.data.flashcards.length})</span>
-              <ArrowRight size={18} />
+              <ArrowRight size={16} />
             </button>
           </div>
         )}
@@ -126,7 +114,7 @@ export const StudyOverview: React.FC<StudyOverviewProps> = ({
           <div
             className="prepai-card"
             style={{
-              padding: '24px',
+              padding: '28px',
               display: 'flex',
               flexDirection: 'column',
               justifyContent: 'space-between',
@@ -138,9 +126,9 @@ export const StudyOverview: React.FC<StudyOverviewProps> = ({
             <div>
               <div
                 style={{
-                  width: '44px',
-                  height: '44px',
-                  borderRadius: '12px',
+                  width: '42px',
+                  height: '42px',
+                  borderRadius: '10px',
                   backgroundColor: 'var(--secondary-light)',
                   color: 'var(--secondary)',
                   display: 'flex',
@@ -149,13 +137,13 @@ export const StudyOverview: React.FC<StudyOverviewProps> = ({
                   marginBottom: '14px',
                 }}
               >
-                <CheckSquare size={22} />
+                <CheckSquare size={20} />
               </div>
               <h3 style={{ fontSize: '1.15rem', fontWeight: 700, marginBottom: '6px' }}>
                 Multiple-Choice Quiz
               </h3>
-              <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)', lineHeight: 1.5 }}>
-                Test your mastery with instant feedback, comprehensive explanations, and wrong-answer retry.
+              <p style={{ fontSize: '0.875rem', color: 'var(--text-muted)', lineHeight: 1.5 }}>
+                Test your mastery with instant feedback, comprehensive explanations, and in-memory wrong-answer retry.
               </p>
             </div>
 
@@ -169,7 +157,7 @@ export const StudyOverview: React.FC<StudyOverviewProps> = ({
               }}
             >
               <span>Start Quiz ({record.data.quiz.length} Questions)</span>
-              <ArrowRight size={18} />
+              <ArrowRight size={16} />
             </button>
           </div>
         )}

@@ -1,55 +1,28 @@
 import express from 'express';
 import { generateStudyMaterial } from '../services/llmService.js';
+import { validateGenerateRequest } from '../validators/requestValidator.js';
 
 const router = express.Router();
 
 router.post('/generate', async (req, res) => {
   try {
-    const { input, mode = 'both', difficulty = 'medium', count = 10 } = req.body;
-
-    // 1. Validation of incoming request
-    if (!input || typeof input !== 'string' || !input.trim()) {
-      return res.status(400).json({
-        error: 'Input text or topic is required.',
-        code: 'EMPTY_INPUT',
+    // 1. Strict Request Validation
+    const requestValidation = validateGenerateRequest(req.body);
+    if (!requestValidation.valid) {
+      return res.status(requestValidation.statusCode).json({
+        error: requestValidation.error,
+        code: requestValidation.code,
       });
     }
 
-    if (input.trim().length > 15000) {
-      return res.status(400).json({
-        error: 'Input is too long. Please limit to under 15,000 characters.',
-        code: 'EXCESSIVE_LENGTH',
-      });
-    }
+    const { input, mode, difficulty, count } = requestValidation.data;
 
-    if (!['flashcards', 'quiz', 'both'].includes(mode)) {
-      return res.status(400).json({
-        error: "Mode must be 'flashcards', 'quiz', or 'both'.",
-        code: 'INVALID_MODE',
-      });
-    }
-
-    if (!['easy', 'medium', 'hard'].includes(difficulty)) {
-      return res.status(400).json({
-        error: "Difficulty must be 'easy', 'medium', or 'hard'.",
-        code: 'INVALID_DIFFICULTY',
-      });
-    }
-
-    const itemCount = parseInt(count, 10);
-    if (isNaN(itemCount) || itemCount < 1 || itemCount > 30) {
-      return res.status(400).json({
-        error: 'Count must be a number between 1 and 30.',
-        code: 'INVALID_COUNT',
-      });
-    }
-
-    // 2. Call LLM Service
+    // 2. Call LLM Service with multi-model failover
     const validationResult = await generateStudyMaterial({
-      input: input.trim(),
+      input,
       mode,
       difficulty,
-      count: itemCount,
+      count,
     });
 
     if (!validationResult.valid) {
@@ -59,8 +32,8 @@ router.post('/generate', async (req, res) => {
       });
     }
 
-    // 3. Return clean, structured JSON
-    return res.json(validationResult.data);
+    // 3. Return clean, validated JSON
+    return res.status(200).json(validationResult.data);
   } catch (error) {
     console.error('API Error in /api/generate:', error);
     return res.status(500).json({
